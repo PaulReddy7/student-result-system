@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVR Portal | Student Result</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Fixed Top-Left Back Button */
+        .top-left-nav {
+            padding: 20px 5%;
+        }
+
+        .back-btn-fixed {
+            color: #818cf8 !important;
+            text-decoration: none !important;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .back-btn-fixed:hover {
+            color: white !important;
+            transform: translateX(-5px);
+        }
+
+        .result-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .result-card {
+            max-width: 500px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 5px;
+            font-weight: 800;
+        }
+
+        .result-divider {
+            height: 2px;
+            background: #f1f5f9;
+            margin: 20px 0;
+            border: none;
+        }
+
+        /* --- THE FIX FOR COMPRESSION --- */
+        .subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Adds space between each row */
+            margin-bottom: 30px;
+        }
+
+        .subject-row {
+            display: flex;
+            justify-content: space-between; /* Pushes name to left, score to right */
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+
+        .subject-row:hover {
+            background: #f1f5f9;
+            transform: scale(1.02);
+        }
+
+        .sub-name {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .sub-score {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .status-pass { background: #dcfce7; color: #166534; }
+        .status-fail { background: #fee2e2; color: #991b1b; }
+
+        .logout-btn {
+            background: #334155 !important;
+            margin-top: 25px;
+            width: auto !important;
+            padding: 12px 30px !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="college-header">
+        <div class="brand">
+            <div class="logo-box"><img src="svr.jpeg"></div>
+            <div class="college-name">
+                <h1 class="header-title">SVR ENGINEERING COLLEGE</h1>
+                <p class="header-subtitle">Student Performance Report</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="top-left-nav">
+        <a href="main.html" class="back-btn-fixed">
+            <span>←</span> Back to Home
+        </a>
+    </div>
+
+    <div class="result-container">
+        <div class="result-card" data-aos="zoom-in">
+            <h2 class="student-name" id="disp-name">Loading...</h2>
+            <p style="color: #64748b; font-size: 0.9rem;">Official Semester Result</p>
+            
+            <hr class="result-divider">
+
+            <div class="subject-list">
+                <div class="subject-row">
+                    <span class="sub-name">Mathematics</span>
+                    <span class="sub-score" id="disp-math">-</span>
+                </div>
+                <div class="subject-row">
+                    <span class="sub-name">Science</span>
+                    <span class="sub-score" id="disp-science">-</span>
+                </div>
+                <div class="subject-row">
+                    <span class="sub-name">English</span>
+                    <span class="sub-score" id="disp-english">-</span>
+                </div>
+                <div class="subject-row" style="background: transparent; border: 2px dashed #f1f5f9;">
+                    <span class="sub-name" style="color: #1e293b;">Final Status</span>
+                    <span id="disp-status" class="status-badge">Checking...</span>
+                </div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">Secure Logout</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4 style="color: #818cf8;">Academic Records</h4>
+                <p>Results shown here are for immediate information and not a legal document.</p>
+            </div>
+            <div class="footer-section">
+                <p>📍 Nandyal, Andhra Pradesh</p>
+                <p>📧 registrar@svrec.ac.in</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800 });
+
+        // Get data from SessionStorage
+        const data = JSON.parse(sessionStorage.getItem('studentData'));
+
+        if (!data) {
+            window.location.href = 'login.html?role=student';
+        } else {
+            document.getElementById('disp-name').innerText = data.name;
+            document.getElementById('disp-math').innerText = data.math;
+            document.getElementById('disp-science').innerText = data.science;
+            document.getElementById('disp-english').innerText = data.english;
+            
+            const statusEl = document.getElementById('disp-status');
+            statusEl.innerText = data.status;
+            statusEl.className = 'status-badge ' + (data.status === 'Pass' ? 'status-pass' : 'status-fail');
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>

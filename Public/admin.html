@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVR Portal | Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Fixed Top-Left Back Button */
+        .top-left-nav {
+            padding: 20px 5%;
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .back-btn-fixed {
+            color: #818cf8 !important;
+            text-decoration: none !important;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .back-btn-fixed:hover {
+            color: white !important;
+            transform: translateX(-5px);
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .admin-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .admin-card h3 {
+            font-size: 1.4rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100% !important;
+            padding: 12px !important;
+            border: 2px solid #f1f5f9 !important;
+            border-radius: 12px !important;
+            background: #f8fafc !important;
+        }
+
+        .logout-btn {
+            background: #334155 !important;
+            margin-top: 40px;
+            width: auto !important;
+            align-self: center;
+            padding: 12px 40px !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="college-header">
+        <div class="brand">
+            <div class="logo-box"><img src="svr.jpeg"></div>
+            <div class="college-name">
+                <h1 class="header-title">SVR ENGINEERING COLLEGE</h1>
+                <p class="header-subtitle">Management Administration Portal</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="top-left-nav">
+        <a href="main.html" class="back-btn-fixed">
+            <span>←</span> Back to Home
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="admin-grid">
+            
+            <div class="admin-card" data-aos="fade-right">
+                <h3>📬 Sync Database</h3>
+                <p style="color: #64748b; font-size: 0.9rem;">Upload the latest Student Excel sheet to update result records instantly.</p>
+                <div class="input-group">
+                    <label>Select Excel File</label>
+                    <input type="file" id="excel-file" accept=".xlsx, .xls">
+                </div>
+                <button onclick="uploadExcel()">Update Records</button>
+            </div>
+
+            <div class="admin-card" data-aos="fade-left">
+                <h3>📢 Post Announcement</h3>
+                <p style="color: #64748b; font-size: 0.9rem;">Broadcast new updates, holidays, or exam schedules to the student home page.</p>
+                <div class="input-group">
+                    <label>Message Content</label>
+                    <input type="text" id="announcement-text" placeholder="Type your notice here...">
+                </div>
+                <button onclick="postNotice()" style="background: var(--primary);">Publish Notice</button>
+            </div>
+
+        </div>
+
+        <div style="display: flex; justify-content: center;">
+            <button class="logout-btn" onclick="logoutAdmin()">Secure Logout</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4 style="color: #818cf8;">ADMINISTRATION HELP</h4>
+                <p>For technical issues regarding the database sync, contact the IT department.</p>
+            </div>
+            <div class="footer-section">
+                <p>📍 SVR Engineering College, Nandyal</p>
+                <p>📧 Admin Support: admin-tech@svrec.ac.in</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        // Security Check
+        if (sessionStorage.getItem('isAdmin') !== 'true') {
+            window.location.href = 'login.html?role=admin';
+        }
+
+        async function postNotice() {
+            const text = document.getElementById('announcement-text').value;
+            if(!text) return alert("Please enter a notice message.");
+
+            try {
+                const res = await fetch('/api/admin/announcement', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text })
+                });
+                if(res.ok) {
+                    alert("Announcement published successfully!");
+                    document.getElementById('announcement-text').value = '';
+                }
+            } catch (err) { alert("Failed to post notice."); }
+        }
+
+        async function uploadExcel() {
+            const fileInput = document.getElementById('excel-file');
+            if(fileInput.files.length === 0) return alert("Please select a file first.");
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if(res.ok) alert("Database updated successfully!");
+                else alert("Upload failed. Please check the file format.");
+            } catch (err) { alert("Server error during upload."); }
+        }
+
+        function logoutAdmin() {
+            sessionStorage.clear();
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>

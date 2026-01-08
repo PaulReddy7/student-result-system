@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVR Portal | Secure Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Fixed Top-Left Back Button */
+        .top-left-nav {
+            position: absolute;
+            top: 100px; /* Positions it just below the header */
+            left: 5%;
+            z-index: 10;
+        }
+
+        .back-btn-fixed {
+            color: #818cf8 !important;
+            text-decoration: none !important;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .back-btn-fixed:hover {
+            color: white !important;
+            transform: translateX(-5px);
+        }
+
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            margin-top: 40px; /* Space for the back button */
+        }
+
+        .login-card {
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-box {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .input-box label {
+            display: block;
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100% !important;
+            padding: 14px !important;
+            border: 2px solid #f1f5f9 !important;
+            border-radius: 12px !important;
+            background: #f8fafc !important;
+        }
+
+        input:focus {
+            border-color: var(--primary) !important;
+            outline: none;
+            background: white !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="college-header">
+        <div class="brand">
+            <div class="logo-box"><img src="svr.jpeg"></div>
+            <div class="college-name">
+                <h1 class="header-title">SVR ENGINEERING COLLEGE</h1>
+                <p class="header-subtitle">Approved by AICTE & Affiliated to JNTUA</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="top-left-nav">
+        <a href="main.html" class="back-btn-fixed">
+            <span>←</span> Back to Home
+        </a>
+    </div>
+
+    <div class="login-wrapper">
+        <div class="login-card" data-aos="zoom-in">
+            <h2 id="portal-title" style="font-size: 1.8rem; margin-bottom: 10px;">Portal Access</h2>
+            <p style="color: #64748b; margin-bottom: 30px; font-size: 0.9rem;">Enter your official credentials to continue</p>
+
+            <div class="input-box">
+                <label>Username / ID</label>
+                <input type="text" id="user" placeholder="Enter your ID">
+            </div>
+
+            <div class="input-box">
+                <label>Password</label>
+                <input type="password" id="pass" placeholder="••••••••">
+            </div>
+
+            <button onclick="login()" id="login-btn" style="margin-top: 10px;">Sign In to Dashboard</button>
+
+            <div id="error-msg" style="color: #e11d48; margin-top: 15px; font-size: 0.85rem; display: none;">
+                Invalid ID or Password
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4 style="color: #818cf8;">SVR ENGINEERING COLLEGE</h4>
+                <p>Empowering minds through technical excellence since establishment.</p>
+            </div>
+            <div class="footer-section">
+                <h4 style="color: #818cf8;">QUICK HELP</h4>
+                <p>📞 Phone: +91 99999 88888</p>
+                <p>📧 Support: support@svrec.ac.in</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+        
+        const role = new URLSearchParams(window.location.search).get('role') || 'student';
+        if(role === 'admin') {
+            document.getElementById('portal-title').innerText = "Admin Access";
+        } else {
+            document.getElementById('portal-title').innerText = "Student Portal";
+            document.getElementById('login-btn').style.background = "var(--secondary)";
+        }
+
+        async function login() {
+            // Your existing login logic...
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const endpoint = role === 'admin' ? '/api/admin/login' : '/api/student/login';
+            
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(role === 'admin' ? {user, pass} : {id: user, password: pass})
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (role === 'admin') {
+                        sessionStorage.setItem('isAdmin', 'true');
+                        window.location.href = 'admin.html';
+                    } else {
+                        sessionStorage.setItem('studentData', JSON.stringify(data.data));
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    document.getElementById('error-msg').style.display = 'block';
+                }
+            } catch (err) { console.error(err); }
+        }
+    </script>
+</body>
+</html>

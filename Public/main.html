@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVR Engineering College | Home</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+<body>
+    <header class="college-header">
+    <div class="brand">
+        <div class="logo-box">
+            <img src="svr.jpeg" alt="SVR Logo">
+        </div>
+        <div class="college-name">
+            <h1 class="header-title">SVR ENGINEERING COLLEGE</h1>
+            <p class="header-subtitle">Approved by AICTE & Affiliated to JNTUA</p>
+        </div>
+    </div>
+</header>
+
+    <div class="container">
+        <div class="dashboard-card" data-aos="fade-up">
+            <h2>📢 Campus Announcements</h2>
+            <div id="notice-list" style="margin-top:20px;"></div>
+        </div>
+
+        <div class="grid-2">
+            <div class="dashboard-card" data-aos="fade-right" data-aos-delay="100">
+                <h3>Admin Portal</h3>
+                <p style="margin: 15px 0; color: #64748b;">Secure access for faculty and staff.</p>
+                <button onclick="window.location.href='login.html?role=admin'">Login as Admin</button>
+            </div>
+            <div class="dashboard-card" data-aos="fade-left" data-aos-delay="200">
+                <h3>Student Portal</h3>
+                <p style="margin: 15px 0; color: #64748b;">Check your results and academic status.</p>
+                <button onclick="window.location.href='login.html?role=student'" style="background:var(--secondary)">Login as Student</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4>SVR Engineering College</h4>
+                <p>Providing value and ethical education since 2007</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>📞 Phone: +91 99999 88888</p>
+                <p>📧 Email: TPO@svrec.ac.in</p>
+                <p>📍 Address: Ayyalur Metta, Nandyal, Andhra Pradesh - 518502</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+        async function loadNotices() {
+            const res = await fetch('/api/announcements');
+            const data = await res.json();
+            document.getElementById('notice-list').innerHTML = data.map(n => `
+                <div style="padding:15px; border-left:4px solid var(--primary); background:white; margin-bottom:10px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <small style="color:var(--primary); font-weight:bold;">${new Date(n.date).toLocaleDateString()}</small>
+                    <p style="margin-top:5px; font-weight:500;">${n.text}</p>
+                </div>
+            `).join('') || "No new announcements.";
+        }
+        loadNotices();
+    </script>
+</body>
+</html>
